@@ -9,10 +9,53 @@
     <servlet-name>productList</servlet-name>
     <servlet-class>com.es.phoneshop.web.ProductListPageServlet</servlet-class>
   </servlet>
+
+  <servlet>
+    <servlet-name>productDetails</servlet-name>
+    <servlet-class>com.es.phoneshop.web.ProductDetailsPageServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>productPriceHistory</servlet-name>
+    <servlet-class>com.es.phoneshop.web.ProductPriceHistoryPageServlet</servlet-class>
+  </servlet>
   
   <servlet-mapping>
     <servlet-name>productList</servlet-name>
     <url-pattern>/products</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+    <servlet-name>productDetails</servlet-name>
+    <url-pattern>/products/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>productPriceHistory</servlet-name>
+    <url-pattern>/products/price-history/*</url-pattern>
+  </servlet-mapping>
+
+  <listener>
+    <listener-class>com.es.phoneshop.web.ProductDemodataServletContextListener</listener-class>
+  </listener>
+
+  <context-param>
+    <param-name>demodata</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <error-page>
+    <location>/WEB-INF/pages/productNotFound.jsp</location>
+    <exception-type>com.es.phoneshop.exception.ProductNotFoundException</exception-type>
+  </error-page>
+
+  <error-page>
+    <error-code>500</error-code>
+    <location>/WEB-INF/pages/serverError.jsp</location>
+  </error-page>
+
+  <error-page>
+    <error-code>404</error-code>
+    <location>/WEB-INF/pages/notFoundError.jsp</location>
+  </error-page>
 </web-app>
