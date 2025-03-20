@@ -1,6 +1,8 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.model.product.ArrayListProductDao;
+import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.enums.SortField;
+import com.es.phoneshop.enums.SortOrder;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -26,6 +28,13 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductListPageServletTest {
+    private static final String QUERY = "query";
+    private static final String SORT_FIELD = "sort";
+    private static final String SORT_ORDER = "order";
+    private static final String PRODUCT_DAO = "productDao";
+    private static final String DESCRIPTION = "description";
+    private static final String ASC = "asc";
+    private static final String ERROR_MESSAGE = "Database error";
     @Mock
     private HttpServletRequest request;
     @Mock
@@ -59,7 +68,10 @@ public class ProductListPageServletTest {
     public void testDoGetWhenDaoThrowsExceptionThrowsRuntimeException() throws ServletException, IOException {
         try (MockedStatic<ArrayListProductDao> mocked = mockStatic(ArrayListProductDao.class)) {
             mocked.when(ArrayListProductDao::getInstance).thenReturn(productDao);
-            when(productDao.findProducts()).thenThrow(new RuntimeException("Database error"));
+            when(productDao.findProducts(QUERY,
+                    SortField.valueOf(DESCRIPTION.toUpperCase()),
+                    SortOrder.valueOf(ASC)))
+                    .thenThrow(new RuntimeException(ERROR_MESSAGE));
 
             ProductListPageServlet servlet = new ProductListPageServlet();
             servlet.init(servletConfig);
@@ -73,7 +85,7 @@ public class ProductListPageServletTest {
         ProductListPageServlet servlet = new ProductListPageServlet();
         servlet.init(servletConfig);
 
-        Field field = ProductListPageServlet.class.getDeclaredField("productDao");
+        Field field = ProductListPageServlet.class.getDeclaredField(PRODUCT_DAO);
         field.setAccessible(true);
         ArrayListProductDao productDao = (ArrayListProductDao) field.get(servlet);
 
