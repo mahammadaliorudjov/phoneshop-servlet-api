@@ -23,6 +23,15 @@ public class ReadWriteLockWrapper {
         }
     }
 
+    public <T> T writeWithReturn(Supplier<T> supplier) {
+        writeLock.lock();
+        try {
+            return supplier.get();
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
     public void write(Writer writer) {
         writeLock.lock();
         try {

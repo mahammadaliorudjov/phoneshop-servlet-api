@@ -1,11 +1,12 @@
-package com.es.phoneshop.dao;
+package com.es.phoneshop.dao.impl;
 
 import com.es.phoneshop.comparators.ProductByDescriptionComparator;
 import com.es.phoneshop.comparators.ProductByOrderComparator;
+import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.enums.SortField;
 import com.es.phoneshop.enums.SortOrder;
 import com.es.phoneshop.exception.ProductNotFoundException;
-import com.es.phoneshop.model.Product;
+import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.utils.ReadWriteLockWrapper;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -26,6 +27,10 @@ public class ArrayListProductDao implements ProductDao {
     private final AtomicLong idGenerator;
     private final ReadWriteLockWrapper readWriteLock;
     private static final String REGEX = " ";
+    private static final String STOCK_IS_NEGATIVE_EXCEPTION = "Stock cannot be negative";
+    private static final String FIELD_IS_EMPTY_EXCEPTION = "Field cannot be empty";
+    private static final String PRODUCT_VALIDATION_FAILED_EXCEPTION = "Product validation failed. ";
+    private static final String PRODUCT_ID_NOT_FOUND_EXCEPTION = "Product with following id is not found: ";
 
     private ArrayListProductDao() {
         products = new ArrayList<>();
@@ -49,7 +54,7 @@ public class ArrayListProductDao implements ProductDao {
         return readWriteLock.read(() -> products.stream()
                 .filter(product -> id.equals(product.getId()))
                 .findAny()
-                .orElseThrow(() -> new ProductNotFoundException("Product with id" + id + " not found")));
+                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_ID_NOT_FOUND_EXCEPTION + id)));
     }
 
     @Override
@@ -96,17 +101,17 @@ public class ArrayListProductDao implements ProductDao {
         validateNotEmpty(product.getImageUrl()).ifPresent(errors::add);
 
         if (product.getStock() < 0) {
-            errors.add("Stock cannot be negative");
+            errors.add(STOCK_IS_NEGATIVE_EXCEPTION);
         }
 
         if (!errors.isEmpty()) {
-            throw new IllegalArgumentException("Product validation failed: " + String.join(", ", errors));
+            throw new IllegalArgumentException(PRODUCT_VALIDATION_FAILED_EXCEPTION + String.join(", ", errors));
         }
     }
 
     private Optional<String> validateNotEmpty(String value) {
         if (value == null || value.trim().isEmpty()) {
-            return Optional.of("Field cannot be empty");
+            return Optional.of(FIELD_IS_EMPTY_EXCEPTION);
         }
         return Optional.empty();
     }
