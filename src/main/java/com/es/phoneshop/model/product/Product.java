@@ -1,10 +1,12 @@
-package com.es.phoneshop.model;
+package com.es.phoneshop.model.product;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
+import java.util.Objects;
 
-public class Product {
+public class Product implements Serializable {
     public Product(String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl, List<ProductPriceHistory> productPriceHistoryList) {
         this.code = code;
         this.description = description;
@@ -114,5 +116,25 @@ public class Product {
 
     public void setProductPriceHistoryList(List<ProductPriceHistory> productPriceHistoryList) {
         this.productPriceHistoryList = productPriceHistoryList;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+        if (!obj.getClass().equals(Product.class)) {
+            return false;
+        }
+        Product product = (Product) obj;
+        return getId().equals(product.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

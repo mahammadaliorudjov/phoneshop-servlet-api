@@ -4,10 +4,13 @@
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 
 <jsp:useBean id="products" type="java.util.ArrayList" scope="request"/>
+<jsp:useBean id="cart" type="com.es.phoneshop.model.cart.Cart" scope="request"/>
+<jsp:useBean id="recentlyViewedProducts" type="java.util.Deque" scope="request"/>
 <tags:master pageTitle="Product List">
   <p>
     Welcome to Expert-Soft training!
   </p>
+  <p>${cart.cartItems}</p>
   <form>
     <input name="query" value="${param.query}">
     <button>Search</button>
@@ -46,4 +49,22 @@
       </tr>
     </c:forEach>
   </table>
+      <c:if test="${not empty recentlyViewedProducts}">
+          <h2>Recently viewed products</h2>
+          <c:forEach var="product" items="${recentlyViewedProducts}">
+              <div>
+                  <p>
+                      <img src="${product.imageUrl}">
+                  </p>
+                  <p>
+                      <a href="${pageContext.servletContext.contextPath}/products/${product.id}">
+                              ${product.description}
+                      </a>
+                  </p>
+                  <p>
+                      <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
+                  </p>
+              </div>
+          </c:forEach>
+      </c:if>
 </tags:master>

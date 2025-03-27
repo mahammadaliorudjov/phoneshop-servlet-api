@@ -1,6 +1,6 @@
 package com.es.phoneshop.comparators;
 
-import com.es.phoneshop.model.Product;
+import com.es.phoneshop.model.product.Product;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
