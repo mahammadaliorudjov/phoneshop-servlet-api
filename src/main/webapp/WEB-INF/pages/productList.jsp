@@ -11,6 +11,11 @@
     Welcome to Expert-Soft training!
   </p>
   <p>${cart.cartItems}</p>
+  <c:if test="${not empty param.message and empty error}">
+    <div class="success" style="color: green">
+      ${param.message}
+    </div>
+  </c:if>
   <form>
     <input name="query" value="${param.query}">
     <button>Search</button>
@@ -24,6 +29,7 @@
           <tags:sortLink sort="description" order="asc"/>
           <tags:sortLink sort="description" order="desc"/>
         </td>
+        <td class="quantity">Quantity</td>
         <td class="price">
           Price
           <tags:sortLink sort="price" order="asc"/>
@@ -32,39 +38,56 @@
       </tr>
     </thead>
     <c:forEach var="product" items="${products}">
-      <tr>
-        <td>
-          <img class="product-tile" src="${product.imageUrl}">
-        </td>
-        <td>
-          <a href="${pageContext.servletContext.contextPath}/products/${product.id}">
-            ${product.description}
-          </a>
-        </td>
-        <td class="price">
-          <a href="${pageContext.servletContext.contextPath}/products/price-history/${product.id}">
-            <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
-          </a>
-        </td>
-      </tr>
+      <form method="post" action="${pageContext.servletContext.contextPath}/products">
+        <tr>
+          <td>
+            <img class="product-tile" src="${product.imageUrl}">
+          </td>
+          <td>
+            <a href="${pageContext.servletContext.contextPath}/products/${product.id}">
+              ${product.description}
+            </a>
+          </td>
+          <td class="quantity">
+            <c:set var="quantityString" value="${param.quantity}"/>
+            <input name="quantity" value="${not empty error and errorProductId eq product.id ? quantityString : 1}" class="quantity"/>
+            <input type="hidden" name="productId" value="${product.id}"/>
+            <c:if test="${not empty error and errorProductId eq product.id}">
+              <div class="error" style="color: red">
+                ${error}
+              </div>
+            </c:if>
+          </td>
+          <td class="price">
+            <a href="${pageContext.servletContext.contextPath}/products/price-history/${product.id}">
+              <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
+            </a>
+          </td>
+          <td>
+            <button>
+              Add to cart
+            </button>
+          </td>
+        </tr>
+      </form>
     </c:forEach>
   </table>
-      <c:if test="${not empty recentlyViewedProducts}">
-          <h2>Recently viewed products</h2>
-          <c:forEach var="product" items="${recentlyViewedProducts}">
-              <div>
-                  <p>
-                      <img src="${product.imageUrl}">
-                  </p>
-                  <p>
-                      <a href="${pageContext.servletContext.contextPath}/products/${product.id}">
-                              ${product.description}
-                      </a>
-                  </p>
-                  <p>
-                      <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
-                  </p>
-              </div>
-          </c:forEach>
-      </c:if>
+    <c:if test="${not empty recentlyViewedProducts}">
+      <h2>Recently viewed products</h2>
+      <c:forEach var="product" items="${recentlyViewedProducts}">
+        <div>
+          <p>
+            <img src="${product.imageUrl}">
+          </p>
+          <p>
+            <a href="${pageContext.servletContext.contextPath}/products/${product.id}">
+              ${product.description}
+            </a>
+          </p>
+          <p>
+            <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
+          </p>
+        </div>
+      </c:forEach>
+    </c:if>
 </tags:master>
