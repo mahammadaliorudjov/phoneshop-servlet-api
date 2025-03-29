@@ -14,7 +14,6 @@
   <table>
     <thead>
     <tr>
-
       <td>Date</td>
       <td>Price</td>
     </tr>
@@ -25,8 +24,8 @@
           ${priceHistory.date}
         </td>
         <td class="price">
-            <fmt:formatNumber value="${priceHistory.price}" type="currency"
-                              currencySymbol="${priceHistory.currency.symbol}"/>
+          <fmt:formatNumber value="${priceHistory.price}" type="currency"
+                            currencySymbol="${priceHistory.currency.symbol}"/>
         </td>
       </tr>
     </c:forEach>

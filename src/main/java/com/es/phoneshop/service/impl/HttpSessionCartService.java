@@ -11,6 +11,7 @@ import com.es.phoneshop.utils.ReadWriteLockWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public class HttpSessionCartService implements CartService {
@@ -42,18 +43,34 @@ public class HttpSessionCartService implements CartService {
             Product product = productDao.getProduct(productId);
             Optional<CartItem> cartItem = findCartItem(cart, product);
             cartItem.ifPresentOrElse(
-                    item -> updateCartItem(item, quantity),
+                    item -> increaseQuantityOfCartItem(item, quantity),
                     () -> createCartItem(cart, product, quantity)
             );
+            recalculateCart(cart);
         });
     }
 
-    private void createCartItem(Cart cart, Product product, int quantity) {
-        int remainingStock = product.getStock() - quantity;
-        if (remainingStock < 0) {
-            throw new OutOfStockException(OUT_OF_STOCK_EXCEPTION_MESSAGE);
-        }
-        cart.getCartItems().add(new CartItem(product, quantity));
+    @Override
+    public void update(Cart cart, Long productId, int quantity) {
+        readWriteLock.write(() -> {
+            Product product = productDao.getProduct(productId);
+            CartItem cartItem = findCartItem(cart, product).get();
+            int stock = cartItem.getProduct().getStock();
+            if (quantity > stock) {
+                throw new OutOfStockException(OUT_OF_STOCK_EXCEPTION_MESSAGE);
+            }
+            cartItem.setQuantity(quantity);
+            recalculateCart(cart);
+        });
+    }
+
+    @Override
+    public void delete(Cart cart, Long productId) {
+        readWriteLock.write(() -> {
+            Product product = productDao.getProduct(productId);
+            cart.getCartItems().removeIf(item -> item.getProduct().equals(product));
+            recalculateCart(cart);
+        });
     }
 
     @Override
@@ -68,6 +85,25 @@ public class HttpSessionCartService implements CartService {
         return cart;
     }
 
+    private void createCartItem(Cart cart, Product product, int quantity) {
+        int remainingStock = product.getStock() - quantity;
+        if (remainingStock < 0) {
+            throw new OutOfStockException(OUT_OF_STOCK_EXCEPTION_MESSAGE);
+        }
+        cart.getCartItems().add(new CartItem(product, quantity));
+    }
+
+    private void recalculateCart(Cart cart) {
+        int totalQuantity = cart.getCartItems().stream().
+                mapToInt(CartItem::getQuantity)
+                .sum();
+        cart.setTotalQuantity(totalQuantity);
+        BigDecimal totalCost = cart.getCartItems().stream()
+                .map(cartItem -> cartItem.getProduct().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        cart.setTotalCost(totalCost);
+    }
+
     private Cart createCartIfAbsent(HttpServletRequest request) {
         return readWriteLock.writeWithReturn(() -> {
             HttpSession session = request.getSession();
@@ -80,7 +116,7 @@ public class HttpSessionCartService implements CartService {
         });
     }
 
-    public void updateCartItem(CartItem cartItem, int desiredQuantity) {
+    public void increaseQuantityOfCartItem(CartItem cartItem, int desiredQuantity) {
         int newQuantity = cartItem.getQuantity() + desiredQuantity;
         int stock = cartItem.getProduct().getStock();
         if (desiredQuantity > stock) {
