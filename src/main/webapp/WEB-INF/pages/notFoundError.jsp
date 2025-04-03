@@ -4,6 +4,6 @@
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 
 <tags:master pageTitle="notFoundError">
-    <h1>404</h1>
-    <p>Not Found Error</p>
+  <h1>404</h1>
+  <p>Not Found Error</p>
 </tags:master>

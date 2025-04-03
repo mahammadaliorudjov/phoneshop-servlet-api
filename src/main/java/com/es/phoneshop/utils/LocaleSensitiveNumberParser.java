@@ -41,7 +41,7 @@ public class LocaleSensitiveNumberParser implements NumberParser {
             String cleanedString = quantityString.replace(String.valueOf(groupingSeparator), "")
                     .replace(String.valueOf(decimalSeparator), ".");
             double parsedValue = Double.parseDouble(cleanedString);
-            return parsedValue >= 0 && parsedValue == Math.floor(parsedValue);
+            return parsedValue > 0 && parsedValue == Math.floor(parsedValue);
         } catch (NumberFormatException e) {
             return false;
         }
