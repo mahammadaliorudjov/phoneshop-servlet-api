@@ -44,7 +44,6 @@ public class ProductDemodataServletContextListener implements ServletContextList
         productDao.save(new Product("simc56", "Siemens C56", new BigDecimal(70), usd, 20, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Siemens/Siemens%20C56.jpg", createProductPriceHistory("Siemens C56", new BigDecimal(70))));
         productDao.save(new Product("simc61", "Siemens C61", new BigDecimal(80), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Siemens/Siemens%20C61.jpg", createProductPriceHistory("Siemens C61", new BigDecimal(80))));
         productDao.save(new Product("simsxg75", "Siemens SXG75", new BigDecimal(150), usd, 40, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Siemens/Siemens%20SXG75.jpg", createProductPriceHistory("Siemens SXG75", new BigDecimal(150))));
-
     }
 
     public List<ProductPriceHistory> createProductPriceHistory(String description, BigDecimal price) {

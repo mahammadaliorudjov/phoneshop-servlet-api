@@ -8,6 +8,7 @@ import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,14 +40,14 @@ public class CartPageServletTest {
     private static final int QUANTITY2_VALUE = 3;
     private static final String[] QUANTITIES = {"2", "3"};
     private static final String[] PRODUCT_IDS = {"1", "2"};
-    ;
-
     @Mock
     private HttpServletRequest request;
     @Mock
     private HttpServletResponse response;
     @Mock
     private ServletConfig servletConfig;
+    @Mock
+    private HttpSession session;
     @Mock
     private HttpSessionCartService cartService;
     @Mock
@@ -99,7 +100,8 @@ public class CartPageServletTest {
         servlet.doPost(request, response);
 
         verify(request).setAttribute(eq(ERRORS), argThat((Map<Long, String> errors) ->
-                errors.containsKey(PRODUCT_ID_LONG) && errors.get(PRODUCT_ID_LONG).isEmpty()
+                errors.containsKey(PRODUCT_ID_LONG) &&
+                        errors.get(PRODUCT_ID_LONG).equals("")
         ));
     }
 }

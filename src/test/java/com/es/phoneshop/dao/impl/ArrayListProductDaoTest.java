@@ -1,12 +1,13 @@
-package com.es.phoneshop.model;
+package com.es.phoneshop.dao.impl;
 
-import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.enums.SortField;
 import com.es.phoneshop.enums.SortOrder;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -25,7 +26,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class ArrayListProductDaoTest {
     private ArrayListProductDao productDao;
     private Currency usd;
@@ -70,14 +71,14 @@ public class ArrayListProductDaoTest {
         int index = 0;
         Product existingProduct = productDao.findProducts(QUERY, null, null).get(index);
 
-        Product result = productDao.getProduct(existingProduct.getId());
+        Product result = productDao.get(existingProduct.getId());
 
         assertEquals(existingProduct.getId(), result.getId());
     }
 
     @Test(expected = ProductNotFoundException.class)
     public void testGetProductNonExistingIdThrowsException() {
-        productDao.getProduct(NON_EXISTENT_PRODUCT_ID);
+        productDao.get(NON_EXISTENT_PRODUCT_ID);
     }
 
     @Test
@@ -173,7 +174,7 @@ public class ArrayListProductDaoTest {
         );
 
         productDao.save(updatedProduct);
-        Product result = productDao.getProduct(existingProduct.getId());
+        Product result = productDao.get(existingProduct.getId());
 
         assertEquals(PRODUCT_DESCRIPTION, result.getDescription());
     }

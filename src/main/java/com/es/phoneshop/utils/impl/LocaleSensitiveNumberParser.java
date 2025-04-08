@@ -1,4 +1,6 @@
-package com.es.phoneshop.utils;
+package com.es.phoneshop.utils.impl;
+
+import com.es.phoneshop.utils.NumberParser;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
