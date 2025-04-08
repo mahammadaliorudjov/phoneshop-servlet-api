@@ -1,7 +1,7 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
+import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.model.product.ProductPriceHistory;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -14,8 +14,9 @@ import java.util.List;
 
 public class ProductPriceHistoryPageServlet extends HttpServlet {
     private static final int PATH_ID_START_INDEX = 1;
-    private ProductDao productDao;
     private static final String PRICE_HISTORY = "priceHistory";
+    private static final String JSP_PATH = "/WEB-INF/pages/productPriceHistory.jsp";
+    private ProductDao productDao;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -27,7 +28,7 @@ public class ProductPriceHistoryPageServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long id = Long.parseLong(request.getPathInfo().substring(PATH_ID_START_INDEX));
         List<ProductPriceHistory> priceHistoryList = productDao.getProduct(id).getProductPriceHistoryList();
-        request.setAttribute("priceHistory", priceHistoryList);
-        request.getRequestDispatcher("/WEB-INF/pages/productPriceHistory.jsp").forward(request, response);
+        request.setAttribute(PRICE_HISTORY, priceHistoryList);
+        request.getRequestDispatcher(JSP_PATH).forward(request, response);
     }
 }
