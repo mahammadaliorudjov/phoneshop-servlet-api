@@ -49,7 +49,7 @@
             </a>
           </td>
           <td class="quantity">
-            <c:set var="quantityString" value="${param.quantity}"/>
+            <c:set var="quantityString" value="${quantity}"/>
             <input name="quantity" value="${not empty error and errorProductId eq product.id ? quantityString : 1}" class="quantity"/>
             <input type="hidden" name="productId" value="${product.id}"/>
             <c:if test="${not empty error and errorProductId eq product.id}">

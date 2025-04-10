@@ -44,10 +44,10 @@
           <td class="quantity">
             <fmt:formatNumber value="${item.quantity}" var="quantity"/>
             <c:set var="error" value="${errors[item.product.id]}"/>
-            <input name="quantity" value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}" class="quantity"/>
+            <input name="quantity" value="${not empty error ? quantities[item.product.id] : item.quantity}" class="quantity"/>
             <input type="hidden" name="productId" value="${item.product.id}"/>
             <c:if test="${not empty error}">
-              <div class="error">
+              <div class="error" style="color: red">
                 ${errors[item.product.id]}
               </div>
             </c:if>
@@ -76,5 +76,20 @@
       <button>Update</button>
     </p>
   </form>
+  <c:choose>
+    <c:when test="${empty errors}">
+      <button onclick="window.location.href='${pageContext.servletContext.contextPath}/checkout'">
+        Checkout
+      </button>
+    </c:when>
+    <c:otherwise>
+      <button disabled style="opacity: 0.6; cursor: not-allowed;">
+        Checkout
+      </button>
+      <div class="error" style="color: red">
+        Please correct the errors in your cart before checkout
+      </div>
+    </c:otherwise>
+  </c:choose>
   <form id='deleteCartItem' method="post"></form>
 </tags:master>

@@ -27,7 +27,7 @@ public class ProductPriceHistoryPageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long id = Long.parseLong(request.getPathInfo().substring(PATH_ID_START_INDEX));
-        List<ProductPriceHistory> priceHistoryList = productDao.getProduct(id).getProductPriceHistoryList();
+        List<ProductPriceHistory> priceHistoryList = productDao.get(id).getProductPriceHistoryList();
         request.setAttribute(PRICE_HISTORY, priceHistoryList);
         request.getRequestDispatcher(JSP_PATH).forward(request, response);
     }

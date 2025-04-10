@@ -11,7 +11,7 @@ import com.es.phoneshop.service.CartService;
 import com.es.phoneshop.service.RecentlyViewedProductsService;
 import com.es.phoneshop.service.impl.HttpSessionCartService;
 import com.es.phoneshop.service.impl.RecentlyViewedProductsServiceImpl;
-import com.es.phoneshop.utils.LocaleSensitiveNumberParser;
+import com.es.phoneshop.utils.impl.LocaleSensitiveNumberParser;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -70,8 +70,7 @@ public class ProductListPageServlet extends HttpServlet {
         long productId = Long.parseLong(request.getParameter(PRODUCT_ID));
         parser = new LocaleSensitiveNumberParser(request.getLocale());
         if (!parser.isIntegerAndPositive(quantityString, request.getLocale())) {
-            request.setAttribute(ERROR, ERROR_INVALID_VALUE_MESSAGE);
-            request.setAttribute(ERROR_PRODUCT_ID, productId);
+            setAttributes(request, quantityString, productId, ERROR_INVALID_VALUE_MESSAGE);
             doGet(request, response);
             return;
         }
@@ -80,8 +79,7 @@ public class ProductListPageServlet extends HttpServlet {
         try {
             cartService.add(cart, productId, quantity);
         } catch (OutOfStockException e) {
-            request.setAttribute(ERROR, e.getMessage());
-            request.setAttribute(ERROR_PRODUCT_ID, productId);
+            setAttributes(request, quantityString, productId, e.getMessage());
             doGet(request, response);
             return;
         }
@@ -93,5 +91,12 @@ public class ProductListPageServlet extends HttpServlet {
                 .map(String::toUpperCase)
                 .map(value -> Enum.valueOf(tClass, value))
                 .orElse(null);
+    }
+
+    private void setAttributes(HttpServletRequest request, String quantityString, long productId,
+                               String errorMessage) {
+        request.setAttribute(ERROR, errorMessage);
+        request.setAttribute(ERROR_PRODUCT_ID, productId);
+        request.setAttribute(QUANTITY, quantityString);
     }
 }

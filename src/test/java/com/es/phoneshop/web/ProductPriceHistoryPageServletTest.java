@@ -58,8 +58,8 @@ public class ProductPriceHistoryPageServletTest {
 
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
         when(request.getPathInfo()).thenReturn(PATH_INFO);
-        when(productDao.getProduct(PRODUCT_ID)).thenReturn(product);
-        when(productDao.getProduct(PRODUCT_ID).getProductPriceHistoryList()).thenReturn(priceHistoryList);
+        when(productDao.get(PRODUCT_ID)).thenReturn(product);
+        when(productDao.get(PRODUCT_ID).getProductPriceHistoryList()).thenReturn(priceHistoryList);
     }
 
     @Test
@@ -74,8 +74,8 @@ public class ProductPriceHistoryPageServletTest {
     @Test(expected = ProductNotFoundException.class)
     public void testDoGetNonExistingProductThrowsException() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn(INVALID_PATH_INFO);
-        when(productDao.getProduct(NON_EXISTING_PRODUCT_ID)).thenReturn(product);
-        when(productDao.getProduct(NON_EXISTING_PRODUCT_ID).getProductPriceHistoryList())
+        when(productDao.get(NON_EXISTING_PRODUCT_ID)).thenReturn(product);
+        when(productDao.get(NON_EXISTING_PRODUCT_ID).getProductPriceHistoryList())
                 .thenThrow(new ProductNotFoundException("Product not found"));
 
         servlet.doGet(request, response);

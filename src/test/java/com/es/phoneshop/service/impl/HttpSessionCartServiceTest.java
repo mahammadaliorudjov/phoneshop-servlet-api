@@ -68,7 +68,7 @@ public class HttpSessionCartServiceTest {
         product.setCode(PRODUCT_CODE);
         product.setStock(INITIAL_PRODUCT_STOCK);
 
-        when(productDao.getProduct(PRODUCT_ID)).thenReturn(product);
+        when(productDao.get(PRODUCT_ID)).thenReturn(product);
     }
 
     @Test
@@ -191,7 +191,7 @@ public class HttpSessionCartServiceTest {
         product2.setId(PRODUCT2_ID);
         product2.setPrice(PRODUCT2_PRICE);
         product2.setStock(INITIAL_PRODUCT_STOCK);
-        when(productDao.getProduct(PRODUCT2_ID)).thenReturn(product2);
+        when(productDao.get(PRODUCT2_ID)).thenReturn(product2);
 
         Cart cart = new Cart();
         cart.setCartItems(new ArrayList<>());

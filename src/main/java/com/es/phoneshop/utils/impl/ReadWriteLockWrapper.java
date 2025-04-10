@@ -1,4 +1,6 @@
-package com.es.phoneshop.utils;
+package com.es.phoneshop.utils.impl;
+
+import com.es.phoneshop.utils.Writer;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;

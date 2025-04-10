@@ -2,7 +2,7 @@ package com.es.phoneshop.service.impl;
 
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.service.RecentlyViewedProductsService;
-import com.es.phoneshop.utils.ReadWriteLockWrapper;
+import com.es.phoneshop.utils.impl.ReadWriteLockWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 

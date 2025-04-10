@@ -7,7 +7,7 @@ import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cart.CartItem;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.service.CartService;
-import com.es.phoneshop.utils.ReadWriteLockWrapper;
+import com.es.phoneshop.utils.impl.ReadWriteLockWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -40,7 +40,7 @@ public class HttpSessionCartService implements CartService {
     @Override
     public void add(Cart cart, Long productId, int quantity) {
         readWriteLock.write(() -> {
-            Product product = productDao.getProduct(productId);
+            Product product = productDao.get(productId);
             Optional<CartItem> cartItem = findCartItem(cart, product);
             cartItem.ifPresentOrElse(
                     item -> increaseQuantityOfCartItem(item, quantity),
@@ -53,7 +53,7 @@ public class HttpSessionCartService implements CartService {
     @Override
     public void update(Cart cart, Long productId, int quantity) {
         readWriteLock.write(() -> {
-            Product product = productDao.getProduct(productId);
+            Product product = productDao.get(productId);
             CartItem cartItem = findCartItem(cart, product).get();
             int stock = cartItem.getProduct().getStock();
             if (quantity > stock) {
@@ -67,7 +67,7 @@ public class HttpSessionCartService implements CartService {
     @Override
     public void delete(Cart cart, Long productId) {
         readWriteLock.write(() -> {
-            Product product = productDao.getProduct(productId);
+            Product product = productDao.get(productId);
             cart.getCartItems().removeIf(item -> item.getProduct().equals(product));
             recalculateCart(cart);
         });
@@ -83,6 +83,13 @@ public class HttpSessionCartService implements CartService {
             cart = createCartIfAbsent(request);
         }
         return cart;
+    }
+
+    @Override
+    public void clearCart(Cart cart, HttpSession session) {
+        cart.getCartItems().clear();
+        session.removeAttribute(CART_SESSION_ATTRIBUTE);
+        recalculateCart(cart);
     }
 
     private void createCartItem(Cart cart, Product product, int quantity) {

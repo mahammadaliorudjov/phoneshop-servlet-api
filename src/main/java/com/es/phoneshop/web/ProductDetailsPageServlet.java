@@ -9,7 +9,7 @@ import com.es.phoneshop.service.CartService;
 import com.es.phoneshop.service.RecentlyViewedProductsService;
 import com.es.phoneshop.service.impl.HttpSessionCartService;
 import com.es.phoneshop.service.impl.RecentlyViewedProductsServiceImpl;
-import com.es.phoneshop.utils.LocaleSensitiveNumberParser;
+import com.es.phoneshop.utils.impl.LocaleSensitiveNumberParser;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -26,6 +26,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
     private static final String CART = "cart";
     private static final String RECENTLY_VIEWED_PRODUCTS = "recentlyViewedProducts";
     private static final String ERROR_INVALID_VALUE_MESSAGE = "Invalid value. Please write a valid value";
+    private static final String OUT_OF_STOCK_EXCEPTION_MESSAGE = "Insufficient stock available. Please adjust your quantity";
     private static final String SUCCESS_MESSAGE_PARAMETER = "message=Product added to cart";
     private static final String SERVLET_PATH = "/products/";
     private static final int PATH_ID_START_INDEX = 1;
@@ -46,7 +47,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long id = Long.parseLong(request.getPathInfo().substring(PATH_ID_START_INDEX));
-        Product product = productDao.getProduct(id);
+        Product product = productDao.get(id);
         recentlyViewedProductsService.addViewedProduct(request, product);
         Deque<Product> products = recentlyViewedProductsService.getViewedProducts(request);
         request.setAttribute(PRODUCT, product);
@@ -58,19 +59,20 @@ public class ProductDetailsPageServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String quantityString = request.getParameter(QUANTITY);
+        Long productId = Long.parseLong(request.getPathInfo().substring(PATH_ID_START_INDEX));
         parser = new LocaleSensitiveNumberParser(request.getLocale());
         if (!parser.isIntegerAndPositive(quantityString, request.getLocale())) {
             request.setAttribute(ERROR, ERROR_INVALID_VALUE_MESSAGE);
+            request.setAttribute(QUANTITY, quantityString);
             doGet(request, response);
             return;
         }
         int quantity = parser.parseInt(quantityString);
-        Long productId = Long.parseLong(request.getPathInfo().substring(PATH_ID_START_INDEX));
         try {
             Cart cart = cartService.getCart(request);
             cartService.add(cart, productId, quantity);
         } catch (OutOfStockException e) {
-            request.setAttribute(ERROR, e.getMessage());
+            request.setAttribute(ERROR, OUT_OF_STOCK_EXCEPTION_MESSAGE);
             doGet(request, response);
             return;
         }

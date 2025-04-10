@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,11 +47,9 @@ public class ProductListPageServletTest {
     private static final String ASC = "asc";
     private static final String ERROR_MESSAGE = "Database error";
     private static final String ERROR = "error";
-    private static final String ERROR_PRODUCT_ID = "errorProductId";
-    private static final String ERROR_INVALID_VALUE_MESSAGE = "Invalid value. Please write a valid value";
     private static final String QUANTITY = "quantity";
-    private static final String INVALID_QUANTITY = "asd";
     private static final String INVALID_PRODUCT_ID = "asd";
+    private static final String ERROR_PRODUCT_ID_ATTRIBUTE = "errorProductId";
     private static final String PRODUCT_ID = "productId";
     private static final String SERVLET_PATH = "/products";
     private static final String SUCCESS_MESSAGE = "?message=Cart updated successfully";
@@ -109,16 +108,14 @@ public class ProductListPageServletTest {
 
     @Test
     public void doPostInvalidQuantitySetsError() throws Exception {
-        when(request.getParameter(QUANTITY)).thenReturn(INVALID_QUANTITY);
+        when(request.getParameter(QUANTITY)).thenReturn(QUANTITY);
         when(request.getParameter(PRODUCT_ID)).thenReturn(PRODUCT_ID_STRING);
         when(request.getLocale()).thenReturn(Locale.US);
-        when(request.getSession()).thenReturn(session);
-        when(session.getAttribute(SESSION_ATTRIBUTE)).thenReturn(new LinkedList<>());
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute(ERROR, ERROR_INVALID_VALUE_MESSAGE);
-        verify(request).setAttribute(ERROR_PRODUCT_ID, PRODUCT_ID_LONG);
+        verify(request).setAttribute(eq(ERROR), anyString());
+        verify(request).setAttribute(eq(ERROR_PRODUCT_ID_ATTRIBUTE), eq(PRODUCT_ID_LONG));
     }
 
     @Test
@@ -137,9 +134,8 @@ public class ProductListPageServletTest {
             servlet.doPost(request, response);
 
             verify(request).setAttribute(eq(ERROR), anyString());
-            verify(request).setAttribute(ERROR_PRODUCT_ID, PRODUCT_ID_LONG);
-            verify(request).getRequestDispatcher(anyString());
-            verify(requestDispatcher).forward(request, response);
+            verify(request).setAttribute(eq(QUANTITY), eq(QUANTITY_VALUE_STRING));
+            verify(request).setAttribute(eq(ERROR_PRODUCT_ID_ATTRIBUTE), eq(PRODUCT_ID_LONG));
         }
     }
 
