@@ -2,12 +2,13 @@ package com.es.phoneshop.dao.impl;
 
 import com.es.phoneshop.comparators.ProductByDescriptionComparator;
 import com.es.phoneshop.comparators.ProductByOrderComparator;
+import com.es.phoneshop.dao.AbstractDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.enums.SortField;
 import com.es.phoneshop.enums.SortOrder;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.utils.ReadWriteLockWrapper;
+import com.es.phoneshop.utils.impl.ReadWriteLockWrapper;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.util.ArrayList;
@@ -17,14 +18,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-public class ArrayListProductDao implements ProductDao {
-    private static final long INITIAL_PRODUCT_ID = 1;
+public class ArrayListProductDao extends AbstractDao<Product> implements ProductDao {
     private static volatile ArrayListProductDao instance;
-    private final List<Product> products;
-    private final AtomicLong idGenerator;
     private final ReadWriteLockWrapper readWriteLock;
     private static final String REGEX = " ";
     private static final String STOCK_IS_NEGATIVE_EXCEPTION = "Stock cannot be negative";
@@ -33,9 +30,12 @@ public class ArrayListProductDao implements ProductDao {
     private static final String PRODUCT_ID_NOT_FOUND_EXCEPTION = "Product with following id is not found: ";
 
     private ArrayListProductDao() {
-        products = new ArrayList<>();
+        items = new ArrayList<>();
         readWriteLock = new ReadWriteLockWrapper();
-        idGenerator = new AtomicLong(INITIAL_PRODUCT_ID);
+        setValidator(this::validateProduct);
+        setExceptionProvider(id ->
+                new ProductNotFoundException(PRODUCT_ID_NOT_FOUND_EXCEPTION + id)
+        );
     }
 
     public static ArrayListProductDao getInstance() {
@@ -50,16 +50,8 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public Product getProduct(Long id) {
-        return readWriteLock.read(() -> products.stream()
-                .filter(product -> id.equals(product.getId()))
-                .findAny()
-                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_ID_NOT_FOUND_EXCEPTION + id)));
-    }
-
-    @Override
     public List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder) {
-        return readWriteLock.read(() -> products.stream()
+        return readWriteLock.read(() -> items.stream()
                 .filter(this::isProductAvailable)
                 .filter(product -> productDescriptionMatchesQuery(product, query))
                 .sorted(new ProductByDescriptionComparator(query))
@@ -76,21 +68,6 @@ public class ArrayListProductDao implements ProductDao {
     private boolean isProductAvailable(Product product) {
         return product.getPrice() != null
                 && product.getStock() > 0;
-    }
-
-    @Override
-    public void save(Product product) {
-        readWriteLock.write(() -> {
-            validateProduct(product);
-            if (product.getId() == null) {
-                product.setId(idGenerator.getAndIncrement());
-                products.add(product);
-            } else {
-                Product existingProduct = getProduct(product.getId());
-                int index = products.indexOf(existingProduct);
-                products.set(index, product);
-            }
-        });
     }
 
     private void validateProduct(Product product) {
@@ -114,12 +91,5 @@ public class ArrayListProductDao implements ProductDao {
             return Optional.of(FIELD_IS_EMPTY_EXCEPTION);
         }
         return Optional.empty();
-    }
-
-    @Override
-    public void delete(Long id) {
-        readWriteLock.write(() -> {
-            products.removeIf(product -> id.equals(product.getId()));
-        });
     }
 }

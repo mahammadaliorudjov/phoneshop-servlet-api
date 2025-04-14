@@ -49,7 +49,7 @@
       <tr>
         <td>quantity</td>
         <td>
-          <input name="quantity" value="${not empty param.quantity ? param.quantity : 1}" required>
+          <input name="quantity" value="${not empty quantity ? quantity : 1}" required>
         </td>
       </tr>
   </table>

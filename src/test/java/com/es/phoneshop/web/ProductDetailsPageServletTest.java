@@ -12,6 +12,7 @@ import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +49,8 @@ public class ProductDetailsPageServletTest {
     private static final String INVALID_QUANTITY_VALUE = "abc";
     private static final String JSP_PATH = "/WEB-INF/pages/productDetails.jsp";
     private static final String ERROR = "error";
+    private static final String PRODUCT_ERROR = "productError";
+    private static final String INVALID_QUANTITY = "invalidQuantity";
     private static final String ERROR_INVALID_VALUE_MESSAGE = "Invalid value. Please write a valid value";
     private static final String OUT_OF_STOCK_EXCEPTION_MESSAGE = "Insufficient stock available. Please adjust your quantity";
     private ProductDetailsPageServlet servlet;
@@ -63,6 +66,8 @@ public class ProductDetailsPageServletTest {
     private ServletConfig servletConfig;
     @Mock
     private RequestDispatcher requestDispatcher;
+    @Mock
+    private HttpSession session;
     @Mock
     private RecentlyViewedProductsServiceImpl recentlyViewedProductsService;
     @Mock
@@ -108,10 +113,8 @@ public class ProductDetailsPageServletTest {
         servlet.doPost(request, response);
 
         verify(request).setAttribute(eq(ERROR), eq(ERROR_INVALID_VALUE_MESSAGE));
-        verify(request).getRequestDispatcher(JSP_PATH);
-        verify(requestDispatcher).forward(request, response);
+        verify(request).setAttribute(eq(QUANTITY), eq(INVALID_QUANTITY_VALUE));
         verify(cartService, never()).add(any(), anyLong(), anyInt());
-        verify(response, never()).sendRedirect(anyString());
     }
 
     @Test
@@ -124,16 +127,13 @@ public class ProductDetailsPageServletTest {
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute(eq(ERROR), any());
-        verify(request).getRequestDispatcher(JSP_PATH);
-        verify(requestDispatcher).forward(request, response);
-        verify(response, never()).sendRedirect(anyString());
+        verify(request).setAttribute(eq(ERROR), eq(OUT_OF_STOCK_EXCEPTION_MESSAGE));
     }
 
     @Test
     public void testDoGetExistingProduct() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn(PATH_INFO);
-        when(productDao.getProduct(PRODUCT_ID)).thenReturn(product);
+        when(productDao.get(PRODUCT_ID)).thenReturn(product);
         when(request.getRequestDispatcher(JSP_PATH)).thenReturn(requestDispatcher);
 
         servlet.doGet(request, response);
@@ -142,7 +142,7 @@ public class ProductDetailsPageServletTest {
     @Test(expected = ProductNotFoundException.class)
     public void testDoGetNonExistingProductThrowsException() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn(INVALID_PATH_INFO);
-        when(productDao.getProduct(NON_EXISTING_PRODUCT_ID))
+        when(productDao.get(NON_EXISTING_PRODUCT_ID))
                 .thenThrow(new ProductNotFoundException(""));
 
         servlet.doGet(request, response);

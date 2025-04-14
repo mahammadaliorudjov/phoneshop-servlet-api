@@ -4,7 +4,7 @@ import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.service.CartService;
 import com.es.phoneshop.service.impl.HttpSessionCartService;
-import com.es.phoneshop.utils.LocaleSensitiveNumberParser;
+import com.es.phoneshop.utils.impl.LocaleSensitiveNumberParser;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -17,6 +17,7 @@ import java.util.Map;
 
 public class CartPageServlet extends HttpServlet {
     private static final String ERRORS = "errors";
+    private static final String QUANTITIES = "quantities";
     private static final String QUANTITY = "quantity";
     private static final String CART = "cart";
     private static final String PRODUCT_ID = "productId";
@@ -45,10 +46,12 @@ public class CartPageServlet extends HttpServlet {
         String[] quantities = request.getParameterValues(QUANTITY);
         String[] productIds = request.getParameterValues(PRODUCT_ID);
         Map<Long, String> errors = new HashMap<>();
+        Map<Long, String> quantitiesMap = new HashMap<>();
         Cart cart = cartService.getCart(request);
         parser = new LocaleSensitiveNumberParser(request.getLocale());
         for (int i = 0; i < quantities.length; i++) {
             long productId = Long.parseLong(productIds[i]);
+            quantitiesMap.put(productId, quantities[i]);
             if (!parser.isIntegerAndPositive(quantities[i], request.getLocale())) {
                 errors.put(productId, ERROR_INVALID_VALUE_MESSAGE);
                 continue;
@@ -65,6 +68,7 @@ public class CartPageServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + SERVLET_PATH + SUCCESS_MESSAGE);
         } else {
             request.setAttribute(ERRORS, errors);
+            request.setAttribute(QUANTITIES, quantitiesMap);
             doGet(request, response);
         }
     }

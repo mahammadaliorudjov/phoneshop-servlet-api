@@ -1,12 +1,14 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.model.Entity;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
 import java.util.Objects;
 
-public class Product implements Serializable {
+public class Product extends Entity implements Serializable {
     public Product(String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl, List<ProductPriceHistory> productPriceHistoryList) {
         this.code = code;
         this.description = description;
