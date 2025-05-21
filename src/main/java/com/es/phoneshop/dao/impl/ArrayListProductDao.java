@@ -4,13 +4,18 @@ import com.es.phoneshop.comparators.ProductByDescriptionComparator;
 import com.es.phoneshop.comparators.ProductByOrderComparator;
 import com.es.phoneshop.dao.AbstractDao;
 import com.es.phoneshop.dao.ProductDao;
+import com.es.phoneshop.enums.SearchMethod;
 import com.es.phoneshop.enums.SortField;
 import com.es.phoneshop.enums.SortOrder;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.predicates.ProductByMaxPricePredicate;
+import com.es.phoneshop.predicates.ProductByMinPricePredicate;
+import com.es.phoneshop.predicates.SearchByStrategyPredicate;
 import com.es.phoneshop.utils.impl.ReadWriteLockWrapper;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,6 +24,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ArrayListProductDao extends AbstractDao<Product> implements ProductDao {
     private static volatile ArrayListProductDao instance;
@@ -59,6 +65,15 @@ public class ArrayListProductDao extends AbstractDao<Product> implements Product
                 .collect(Collectors.toList()));
     }
 
+    @Override
+    public List<Product> advancedSearch(String query, BigDecimal minPrice, BigDecimal maxPrice, SearchMethod searchMethod) {
+        return readWriteLock.read(() -> findProducts(items)
+                .filter(new ProductByMinPricePredicate(minPrice))
+                .filter(new ProductByMaxPricePredicate(maxPrice))
+                .filter(new SearchByStrategyPredicate(query, searchMethod))
+                .collect(Collectors.toList()));
+    }
+
     private boolean productDescriptionMatchesQuery(Product product, String query) {
         return StringUtils.isBlank(query) || Arrays.stream(query.split(REGEX))
                 .anyMatch(word -> product.getDescription().toLowerCase(Locale.ROOT)
@@ -91,5 +106,10 @@ public class ArrayListProductDao extends AbstractDao<Product> implements Product
             return Optional.of(FIELD_IS_EMPTY_EXCEPTION);
         }
         return Optional.empty();
+    }
+
+    private Stream<Product> findProducts(List<Product> products) {
+        return products.stream()
+                .filter(this::isProductAvailable);
     }
 }
